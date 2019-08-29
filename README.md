@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # android-test-project
 
 #### 介绍
@@ -35,3 +36,7 @@
 4. [GVP](https://gitee.com/gvp) 全称是码云最有价值开源项目，是码云综合评定出的优秀开源项目
 5. 码云官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
 6. 码云封面人物是一档用来展示码云会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+=======
+# majia
+安卓马甲制作
+>>>>>>> 78313c9bf09d302254ee89dd72ed4f12b1885370
