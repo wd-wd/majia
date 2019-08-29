@@ -1,0 +1,104 @@
+apply plugin: 'com.android.application'
+
+// apk的渠道名称的前缀、apk的文件名称的前缀，也是主包与马甲包的区分字段(注：马甲包最多只能有一个下划线)
+def CHANNEL_PREFIX_TEST='test'
+def CHANNEL_PREFIX_TESTTEST='testtest'
+
+def CHANNEL_PREFIX = CHANNEL_PREFIX_TESTTEST
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.2"
+    defaultConfig {
+        applicationId "com.example.mydemotest"
+        minSdkVersion 15
+        targetSdkVersion 29
+        versionCode 1
+        //和versionCode保持一致
+        flavorDimensions "1"
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    //资源设置
+    sourceSets {
+        main {
+            // skin + res: 皮肤+各自的资源
+            // skin: 包含layout资源，所以有Java文件、layout文件、drawable文件
+            // res: 包含各自不同的，appName、颜色、图片(drawable-hdpi)、
+            def resDir, javaDir
+            switch (CHANNEL_PREFIX){
+                case CHANNEL_PREFIX_TESTTEST:
+                    javaDir ='src/main/java'
+                    resDir = ['skin-res/testtest/res']
+                    break
+                case CHANNEL_PREFIX_TEST:
+                  default:
+                    javaDir = 'src/main/java'
+                    resDir = ['skin-res/test/res']
+                    break
+
+            }
+            java.srcDirs = ['src/main/java', javaDir]
+            res.srcDirs = ['src/main/res', resDir]
+        }
+    }
+    productFlavors {
+        offical {}
+    }
+
+    productFlavors.each { flavor ->
+        def manifestApplicationId
+        def source_id
+        def user_agent_unique_identifier
+        def pack_name
+        switch (CHANNEL_PREFIX) {
+            case CHANNEL_PREFIX_TESTTEST:
+                source_id = '0001'
+                user_agent_unique_identifier = "testtest"
+                manifestApplicationId = 'com.testtest.testtest'
+                pack_name = "testtest"
+                break
+            case CHANNEL_PREFIX_TEST:
+            default:
+                source_id = '0002'
+                user_agent_unique_identifier = "test"
+                manifestApplicationId = 'com.test.test'
+                pack_name = "test"
+                break
+        }
+
+        flavor.manifestPlaceholders = [
+                MANIFEST_APPLICATION_ID: manifestApplicationId
+        ]
+
+        flavor.applicationId = manifestApplicationId
+        flavor.buildConfigField "String", "SOURCE_ID", "\"${source_id}\""// 用户的注册来源
+        flavor.buildConfigField "String", "USER_AGENT", "\"${user_agent_unique_identifier}\""// User-Agent
+        flavor.buildConfigField "String", "CHANNEL_PREFIX", "\"${CHANNEL_PREFIX}\""// 渠道号
+        flavor.buildConfigField "String", "PACK_NAME", "\"${pack_name}\""//包名
+    }
+
+    //渠道打包
+    android.applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                def fileName = "${CHANNEL_PREFIX}.apk"
+                outputFileName  = fileName
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+}
